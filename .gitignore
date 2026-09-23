@@ -1,0 +1,6 @@
+.Rhistory
+.RData
+.Rproj.user/
+Rplots.pdf
+.ipynb_checkpoints/
+__pycache__/
