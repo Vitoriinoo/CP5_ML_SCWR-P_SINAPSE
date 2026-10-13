@@ -19,8 +19,9 @@ O trabalho usa o dataset **WINES**: 178 vinhos de três cultivares da mesma regi
 ```
 ├── parte1_statistical_computing/
 │   ├── cp5_sinapse_estatistica.R   # análise estatística comentada (R)
-│   └── wine-clustering.csv         # dataset
-└── parte2_machine_learning/        # K-means (em desenvolvimento)
+│   └── wine-clustering.csv         # dataset (usado nas duas partes)
+└── parte2_machine_learning/
+    └── cp5_sinapse_kmeans.ipynb    # K-Means comentado e executado (Python)
 ```
 
 ## Parte 1 — Statistical Computing (R)
@@ -58,5 +59,40 @@ As interpretações de cada resultado estão nos comentários do próprio códig
 
 ## Parte 2 — Machine Learning & Modelling
 
-Em desenvolvimento: agrupamento dos vinhos com K-means, com escolha do número de grupos pelos métodos Elbow e
-Silhueta.
+Agrupamento dos 178 vinhos com **K-Means**, usando o mesmo CSV da Parte 1. O notebook
+`parte2_machine_learning/cp5_sinapse_kmeans.ipynb` está com todas as células executadas, e cada etapa traz a
+justificativa da escolha feita.
+
+| Item | Conteúdo |
+|---|---|
+| **a) Introdução** | Problema não supervisionado (não há coluna-alvo), solução proposta e as 3 hipóteses herdadas da Parte 1 |
+| **b) Pré-processamento** | Remoção de feature de classe (`Wine`, se existir), nulos e duplicados (nenhum), outliers pela regra do IQR (mantidos, como na Parte 1) e padronização com `StandardScaler` |
+| **c) Ajuste do K-Means** | O algoritmo passo a passo em 2D (álcool × acidez), ajuste com as 13 variáveis (`k-means++`, `n_init=10`) e teste de robustez aos outliers |
+| **d) Elbow e Silhueta** | Varredura de k = 2 a 10, gráfico de silhueta por grupo e modelo final em um `Pipeline` |
+| **e) Análise dos grupos** | Perfil de cada grupo, teor alcoólico, acidez, cinzas, mapa de calor dos centróides e projeção PCA |
+| **Validação** | Comparação com o cultivar real, que o modelo nunca viu (ARI), e o experimento da aula sobre padronização |
+
+### Principais resultados
+
+- **Sem padronizar, a prolina responde por 99,77% da distância.** Por isso as 13 variáveis foram padronizadas.
+- **k = 3**: o cotovelo (queda de 23% na inércia até k = 3, depois ≤ 8%) e a silhueta (máxima de 0,285) concordam.
+- **Os três grupos:**
+
+| Grupo | Vinhos | Teor alcoólico | Ácido málico | Cinzas | Assinatura |
+|---|---|---|---|---|---|
+| **Encorpados** | 62 | o maior (13,68%) | baixo (2,00 g/L) | as maiores (2,47) | muita prolina e flavonoides |
+| **Ácidos** | 51 | médio (13,13%) | **o maior** (3,31 g/L) | médias (2,42) | cor intensa, poucos flavonoides |
+| **Leves** | 65 | o menor (12,25%) | o menor (1,90 g/L) | as menores (2,23) | cor clara, pouca prolina |
+
+- **Ligação com a Parte 1:** a bimodalidade do teor alcoólico era a mistura de grupos (H1 confirmada). Existe um
+  grupo mais ácido, com 68% dos vinhos acima de 3 g/L (H2 confirmada em parte). A acidez **não** é o que mais
+  separa os grupos (H3 não confirmada): o CV dela é alto também dentro de cada grupo, e quem mais separa são os
+  flavonoides, a prolina, os fenóis, a cor e o próprio teor alcoólico.
+- **Validação:** cada grupo corresponde a um cultivar (ARI = 0,897). Só 6 dos 178 vinhos ficaram fora do grupo do
+  seu cultivar.
+
+### Como executar
+
+1. Instale as bibliotecas: `pip install numpy pandas matplotlib scikit-learn jupyter`.
+2. Abra `parte2_machine_learning/cp5_sinapse_kmeans.ipynb` e execute todas as células. O CSV é lido da pasta da
+   Parte 1. Fora do repositório (ex.: Google Colab), o notebook baixa o arquivo direto deste GitHub.
